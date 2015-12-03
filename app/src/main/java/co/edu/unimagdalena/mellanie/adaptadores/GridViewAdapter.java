@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 
 import co.edu.unimagdalena.mellanie.R;
@@ -22,6 +24,14 @@ public class GridViewAdapter extends BaseAdapter {
 
     public GridViewAdapter(Context context, ArrayList<Imagen> imagenes) {
         this.context = context;
+        this.imagenes = imagenes;
+    }
+
+    public ArrayList<Imagen> getImagenes() {
+        return imagenes;
+    }
+
+    public void setImagenes(ArrayList<Imagen> imagenes) {
         this.imagenes = imagenes;
     }
 
@@ -52,7 +62,11 @@ public class GridViewAdapter extends BaseAdapter {
 
             ImageView imagen = (ImageView) gridView.findViewById(R.id.imageView);
 
-            imagen.setImageResource(imagenes.get(position).getRecurso());
+            imagenes.get(position).generarUrl();
+
+            Picasso.with(context.getApplicationContext()).setLoggingEnabled(true);
+
+            Picasso.with(context.getApplicationContext()).load(imagenes.get(position).getUrl()).placeholder(R.drawable.com_facebook_profile_picture_blank_portrait).error((R.drawable.com_facebook_button_send_icon)).into(imagen);
 
         }else{
             gridView = (View) convertView;

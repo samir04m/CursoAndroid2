@@ -2,6 +2,7 @@ package co.edu.unimagdalena.mellanie;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -20,11 +21,22 @@ import com.facebook.Profile;
 import com.facebook.ProfileTracker;
 import com.facebook.login.LoginManager;
 import com.facebook.login.widget.ProfilePictureView;
+import com.google.gson.Gson;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
+import com.squareup.okhttp.Call;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 import co.edu.unimagdalena.mellanie.adaptadores.GridViewAdapter;
+import co.edu.unimagdalena.mellanie.modelos.FlickPhotoContainer;
 import co.edu.unimagdalena.mellanie.modelos.Imagen;
 
 public class NavigationActivity extends AppCompatActivity
@@ -36,6 +48,10 @@ public class NavigationActivity extends AppCompatActivity
     MaterialSearchView search;
     GridView gridView;
     private ProfileTracker mProfileTracker;
+    private static String FLICKR_URL = "https://api.flickr.com/services/rest/?method";
+    private static String FLICKR_JSON = "json";
+    private static String FLICKR_API_KEY = "af11210581b94bbb60b9e89999582d28";
+    private GridViewAdapter gridViewAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,8 +90,8 @@ public class NavigationActivity extends AppCompatActivity
             nombrefb = (TextView) view.findViewById(R.id.nombrefblbl);
             emailfb = (TextView) view.findViewById(R.id.emailfblbl);
 
-            System.out.println("Profile ID: "+profile.getId());
-            System.out.println("Profile Name: "+profile.getFirstName());
+            System.out.println("Profile ID: " + profile.getId());
+            System.out.println("Profile Name: " + profile.getFirstName());
 
             profilePictureView.setProfileId(profile.getId());
 
@@ -98,17 +114,74 @@ public class NavigationActivity extends AppCompatActivity
                  }
                  });
 
-            Imagen imagen1 = new Imagen(R.drawable.com_facebook_profile_picture_blank_portrait, 1, "Pepe Perez", "Android 1");
-            Imagen imagen2 = new Imagen(R.drawable.com_facebook_profile_picture_blank_portrait, 1, "ASdsad", "IOS");
 
-        ArrayList<Imagen> imagenes = new ArrayList<>();
-        imagenes.add(imagen1);
-        imagenes.add(imagen2);
-        imagenes.add(new Imagen(R.drawable.com_facebook_profile_picture_blank_portrait, 1, "ASdsad", "IOS"));
-        imagenes.add(new Imagen(R.drawable.com_facebook_profile_picture_blank_portrait, 1, "ASdsad", "IOS"));
+        final ArrayList<Imagen> imagenes = new ArrayList<>();
 
-        gridView.setAdapter(new GridViewAdapter(this, imagenes));
 
+        gridViewAdapter = new GridViewAdapter( this, imagenes);
+        gridView.setAdapter(gridViewAdapter);
+
+
+        //Descargamos el JSON Flickr
+        OkHttpClient client = new OkHttpClient();
+
+        String url = FLICKR_URL + "=flickr.photos.getRecent&format=" + FLICKR_JSON + "&api_key=" + FLICKR_API_KEY + "&nojsoncallback=1&per_page=10";
+
+        System.out.println("URL: " + url);
+
+        Request request = new Request.Builder().url(url).build();
+
+        Call call = client.newCall(request);
+
+        final Handler handler = new Handler(getApplicationContext().getMainLooper());
+
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(final Response response) throws IOException {
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        try {
+
+                            System.out.println("Respuesta: ");
+                            final String responseJson = response.body().string();
+                            System.out.println(responseJson);
+
+                            JSONObject jsonObject = new JSONObject(responseJson);
+                            Gson gson = new Gson();
+
+                            FlickPhotoContainer flickPhotoContainer = gson.fromJson(jsonObject.getJSONObject("photos").toString(), FlickPhotoContainer.class);
+
+                            System.out.println("NUM Fotos: ");
+                            System.out.println(flickPhotoContainer.getTotal());
+
+                            ArrayList<Imagen> imagenesTemp;
+
+                            imagenesTemp = flickPhotoContainer.getPhoto();
+
+                            gridViewAdapter.setImagenes(imagenesTemp);
+
+                            gridViewAdapter.notifyDataSetChanged();
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }catch (IOException e){
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+
+
+            }
+        });
     }
 
     @Override

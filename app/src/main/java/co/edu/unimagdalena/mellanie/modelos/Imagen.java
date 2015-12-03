@@ -4,47 +4,82 @@ package co.edu.unimagdalena.mellanie.modelos;
  * Created by S4M1R on 03/12/2015.
  */
 public class Imagen {
-    private int recurso;
-    private String titulo;
-    private String autor;
-    private int likes;
+    private String id;
+    private String owner;
+    private String farm;
+    private String server;
+    private String secret;
+    private String title;
+    private String url;
 
-    public Imagen(int recurso, int likes, String autor, String titulo) {
-        this.recurso = recurso;
-        this.likes = likes;
-        this.autor = autor;
-        this.titulo = titulo;
+    public Imagen(String id, String owner, String farm, String server, String secret, String title) {
+        this.id = id;
+        this.owner = owner;
+        this.farm = farm;
+        this.server = server;
+        this.secret = secret;
+        this.title = title;
+
+
     }
 
-    public int getRecurso() {
-        return recurso;
+    public void generarUrl(){
+        url = "https://farm" + farm +".staticflickr.com/"+ server+"/"+ id+"_"+secret+".jpg";
     }
 
-    public void setRecurso(int recurso) {
-        this.recurso = recurso;
+    public String getId() {
+        return id;
     }
 
-    public String getTitulo() {
-        return titulo;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
+    public String getOwner() {
+        return owner;
     }
 
-    public String getAutor() {
-        return autor;
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
-    public void setAutor(String autor) {
-        this.autor = autor;
+    public String getFarm() {
+        return farm;
     }
 
-    public int getLikes() {
-        return likes;
+    public void setFarm(String farm) {
+        this.farm = farm;
     }
 
-    public void setLikes(int likes) {
-        this.likes = likes;
+    public String getServer() {
+        return server;
+    }
+
+    public void setServer(String server) {
+        this.server = server;
+    }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }
