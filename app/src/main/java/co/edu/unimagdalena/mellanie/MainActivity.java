@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -26,6 +28,12 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+        if(estaLogueado()){
+            Intent intent = new Intent(getApplicationContext(), NavigationActivity.class);
+            startActivity(intent);
+        }
+
+
         loginButton = (LoginButton) findViewById(R.id.login_button);
         titulolbl = (TextView) findViewById(R.id.titulolbl);
 
@@ -35,17 +43,24 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSuccess(LoginResult loginResult) {
-                titulolbl.setText(loginResult.getAccessToken().getUserId());
+                Intent intent = new Intent(getApplicationContext(), NavigationActivity.class);
+
+                startActivity(intent);
+
+                //titulolbl.setText(loginResult.getAccessToken().getUserId());
             }
 
             @Override
             public void onCancel() {
-                titulolbl.setText("User cancel request");
+                Toast.makeText(getApplicationContext(), "Cancelaste el login", Toast.LENGTH_LONG);
+                // /titulolbl.setText("User cancel request");
             }
 
             @Override
             public void onError(FacebookException error) {
-                titulolbl.setText("Facebook error");
+
+                Toast.makeText(getApplicationContext(), "Hubo un error al loguearte en la aplicacion", Toast.LENGTH_LONG);
+                //titulolbl.setText("Facebook error");
             }
         });
 
@@ -56,5 +71,8 @@ public class MainActivity extends AppCompatActivity {
                 callbackManager.onActivityResult(requestCode, resultCode, data);
             }
 
+        private boolean estaLogueado(){
+              return AccessToken.getCurrentAccessToken() != null;
+        }
 
 }
