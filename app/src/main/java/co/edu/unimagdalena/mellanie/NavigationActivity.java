@@ -118,7 +118,7 @@ public class NavigationActivity extends AppCompatActivity
         final ArrayList<Imagen> imagenes = new ArrayList<>();
 
 
-        gridViewAdapter = new GridViewAdapter( this, imagenes);
+        gridViewAdapter = new GridViewAdapter(this, imagenes);
         gridView.setAdapter(gridViewAdapter);
 
 
@@ -144,14 +144,14 @@ public class NavigationActivity extends AppCompatActivity
             @Override
             public void onResponse(final Response response) throws IOException {
 
+                System.out.println("Respuesta: ");
+                final String responseJson = response.body().string();
+
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
 
                         try {
-
-                            System.out.println("Respuesta: ");
-                            final String responseJson = response.body().string();
                             System.out.println(responseJson);
 
                             JSONObject jsonObject = new JSONObject(responseJson);
@@ -171,8 +171,6 @@ public class NavigationActivity extends AppCompatActivity
                             gridViewAdapter.notifyDataSetChanged();
 
                         } catch (JSONException e) {
-                            e.printStackTrace();
-                        }catch (IOException e){
                             e.printStackTrace();
                         }
 
