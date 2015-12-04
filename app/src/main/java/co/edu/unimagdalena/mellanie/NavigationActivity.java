@@ -14,8 +14,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.Profile;
 import com.facebook.ProfileTracker;
@@ -50,8 +52,10 @@ public class NavigationActivity extends AppCompatActivity
     private ProfileTracker mProfileTracker;
     private static String FLICKR_URL = "https://api.flickr.com/services/rest/?method";
     private static String FLICKR_JSON = "json";
-    private static String FLICKR_API_KEY = "af11210581b94bbb60b9e89999582d28";
+    private static String FLICKR_API_KEY = "da8b025d380d6b856e1cb8617a3d093d";
     private GridViewAdapter gridViewAdapter;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,18 +66,10 @@ public class NavigationActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
         Profile profile = Profile.getCurrentProfile();
 
-        /*
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        */
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -85,101 +81,77 @@ public class NavigationActivity extends AppCompatActivity
 
         View view = navigationView.getHeaderView(0);
 
-            profilePictureView = (ProfilePictureView) view.findViewById(R.id.profilePicture);
 
-            nombrefb = (TextView) view.findViewById(R.id.nombrefblbl);
-            emailfb = (TextView) view.findViewById(R.id.emailfblbl);
+        profilePictureView = (ProfilePictureView) view.findViewById(R.id.profilePicture);
 
-            System.out.println("Profile ID: " + profile.getId());
-            System.out.println("Profile Name: " + profile.getFirstName());
+        nombrefb = (TextView) view.findViewById(R.id.nombrefblbl);
+        emailfb = (TextView) view.findViewById(R.id.emailfblbl);
 
-            profilePictureView.setProfileId(profile.getId());
 
-            gridView = (GridView) findViewById(R.id.gridView);
+        System.out.println("Profile ID: " + profile.getId());
+        System.out.println("Profile Name: " + profile.getFirstName());
 
-            nombrefb.setText(profile.getName());
+        profilePictureView.setProfileId(profile.getId());
 
-            search = (MaterialSearchView) findViewById(R.id.searchbtn);
+        gridView = (GridView) findViewById(R.id.gridView);
 
-            search.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
 
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    return false;
-                }
 
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    return false;
-                 }
-                 });
+        nombrefb.setText(profile.getName());
+
+        search = (MaterialSearchView) findViewById(R.id.searchbtn);
+
+        search.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Toast.makeText(getApplicationContext(), "Buscando: "+query, Toast.LENGTH_LONG).show();
+
+                String searchUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=605aa2be67eed97265bd04c3af596495&format=json&nojsoncallback=1&per_page=10&text="+query;
+
+
+                System.out.println("URL: " + searchUrl);
+
+                makeRequest(searchUrl);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
 
 
         final ArrayList<Imagen> imagenes = new ArrayList<>();
 
-
         gridViewAdapter = new GridViewAdapter(this, imagenes);
         gridView.setAdapter(gridViewAdapter);
 
-
-        //Descargamos el JSON Flickr
-        OkHttpClient client = new OkHttpClient();
-
-        String url = FLICKR_URL + "=flickr.photos.getRecent&format=" + FLICKR_JSON + "&api_key=" + FLICKR_API_KEY + "&nojsoncallback=1&per_page=10";
-
-        System.out.println("URL: " + url);
-
-        Request request = new Request.Builder().url(url).build();
-
-        Call call = client.newCall(request);
-
-        final Handler handler = new Handler(getApplicationContext().getMainLooper());
-
-        call.enqueue(new Callback() {
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onFailure(Request request, IOException e) {
-                e.printStackTrace();
-            }
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getApplicationContext(), DetallesActivity.class);
 
-            @Override
-            public void onResponse(final Response response) throws IOException {
+                Bundle bundle = new Bundle();
 
-                System.out.println("Respuesta: ");
-                final String responseJson = response.body().string();
+                intent.putExtra("foto", gridViewAdapter.getImagenes().get(position).getId());
 
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        try {
-                            System.out.println(responseJson);
-
-                            JSONObject jsonObject = new JSONObject(responseJson);
-                            Gson gson = new Gson();
-
-                            FlickPhotoContainer flickPhotoContainer = gson.fromJson(jsonObject.getJSONObject("photos").toString(), FlickPhotoContainer.class);
-
-                            System.out.println("NUM Fotos: ");
-                            System.out.println(flickPhotoContainer.getTotal());
-
-                            ArrayList<Imagen> imagenesTemp;
-
-                            imagenesTemp = flickPhotoContainer.getPhoto();
-
-                            gridViewAdapter.setImagenes(imagenesTemp);
-
-                            gridViewAdapter.notifyDataSetChanged();
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                });
-
-
+                startActivity(intent);
             }
         });
+
+
+
+
+
+        String url = FLICKR_URL+"=flickr.photos.getRecent&format="+FLICKR_JSON+"&api_key="+FLICKR_API_KEY+"&nojsoncallback=1&per_page=10";
+
+        makeRequest(url);
+
+
+
+
+
     }
 
     @Override
@@ -196,7 +168,6 @@ public class NavigationActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.navigation, menu);
-
         MenuItem item = menu.findItem(R.id.action_search);
         search.setMenuItem(item);
 
@@ -209,13 +180,76 @@ public class NavigationActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        /*---------------------------------------------------
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }--------------------------------------------------*/
+
+
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void makeRequest(String url) {
+        // Descargamos el JSON de Flickr
+        OkHttpClient client = new OkHttpClient();
+
+        gridViewAdapter.setImagenes(new ArrayList<Imagen>());
+        gridViewAdapter.notifyDataSetChanged();
+
+        System.out.println("URL: " + url);
+
+        Request request = new Request.Builder().url(url).build();
+
+        Call call = client.newCall(request);
+
+
+        final Handler handler = new Handler(getApplicationContext().getMainLooper());
+
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(final Response response) throws IOException {
+
+
+                System.out.println("Respuesta: ");
+                final String responseJson = response.body().string();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            System.out.println(responseJson);
+
+
+                            JSONObject jsonObject = new JSONObject(responseJson);
+
+                            Gson gson = new Gson();
+
+                            FlickPhotoContainer flickPhotoContainer = gson.fromJson(jsonObject.getJSONObject("photos").toString(), FlickPhotoContainer.class);
+
+                            System.out.println("NUM Fotos: ");
+                            System.out.println(flickPhotoContainer.getTotal());
+
+                            ArrayList<Imagen> imagenesTemp;
+
+                            imagenesTemp = flickPhotoContainer.getPhoto();
+
+                            gridViewAdapter.setImagenes(imagenesTemp);
+
+                            gridViewAdapter.notifyDataSetChanged();
+
+
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+
+            }
+        });
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -228,9 +262,11 @@ public class NavigationActivity extends AppCompatActivity
             // Handle the camera action
         } else if (id == R.id.nav_share) {
             LoginManager.getInstance().logOut();
+
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
             finish();
+
 
         }
 
@@ -239,3 +275,4 @@ public class NavigationActivity extends AppCompatActivity
         return true;
     }
 }
+

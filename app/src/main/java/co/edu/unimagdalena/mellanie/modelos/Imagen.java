@@ -24,7 +24,8 @@ public class Imagen {
     }
 
     public void generarUrl(){
-        url = "https://farm" + farm +".staticflickr.com/"+ server+"/"+ id+"_"+secret+".jpg";
+        this.url = "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + secret + ".jpg";
+        System.out.println("URL generated: "+url);
     }
 
     public String getId() {

@@ -22,11 +22,6 @@ public class GridViewAdapter extends BaseAdapter {
     private Context context;
     private ArrayList<Imagen> imagenes;
 
-    public GridViewAdapter(Context context, ArrayList<Imagen> imagenes) {
-        this.context = context;
-        this.imagenes = imagenes;
-    }
-
     public ArrayList<Imagen> getImagenes() {
         return imagenes;
     }
@@ -34,6 +29,12 @@ public class GridViewAdapter extends BaseAdapter {
     public void setImagenes(ArrayList<Imagen> imagenes) {
         this.imagenes = imagenes;
     }
+
+    public GridViewAdapter(Context context, ArrayList<Imagen> imagenes) {
+        this.context = context;
+        this.imagenes = imagenes;
+    }
+
 
     @Override
     public int getCount() {
@@ -62,11 +63,18 @@ public class GridViewAdapter extends BaseAdapter {
 
             ImageView imagen = (ImageView) gridView.findViewById(R.id.imageView);
 
+            //imagen.setImageResource(imagenes.get(position).getRecurso());
+
+            System.out.println("Imprimiendo: ");
+            System.out.println(imagenes.get(position).getTitle());
             imagenes.get(position).generarUrl();
+            System.out.println(imagenes.get(position).getUrl());
+
+            Picasso.with(context.getApplicationContext()).setIndicatorsEnabled(true);
 
             Picasso.with(context.getApplicationContext()).setLoggingEnabled(true);
 
-            Picasso.with(context.getApplicationContext()).load(imagenes.get(position).getUrl()).placeholder(R.drawable.com_facebook_profile_picture_blank_portrait).error((R.drawable.com_facebook_button_send_icon)).into(imagen);
+            Picasso.with(context.getApplicationContext()).load(imagenes.get(position).getUrl()).placeholder(R.drawable.com_facebook_profile_picture_blank_portrait).error(R.drawable.com_facebook_button_send_icon).into(imagen);
 
         }else{
             gridView = (View) convertView;

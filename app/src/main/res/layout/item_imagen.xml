@@ -9,6 +9,8 @@
         android:id="@+id/imageView"
         android:layout_gravity="center_horizontal"
         android:src="@drawable/abc_btn_check_to_on_mtrl_015"
-        android:padding="5dp"/>
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        />
 
 </LinearLayout>
